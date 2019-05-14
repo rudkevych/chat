@@ -2,19 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Online chat</title>
+    <title>Chat</title>
 </head>
 <body>
 
 <div class=”container”>
-    <div class=””>
-        <h1>Send Message</h1>
-        <textarea id="textarea" placeholder="white your message"></textarea> <br>
-        <button id=”send” class=”send”>Send</button>
-    </div>
-    <div id=”messages”>
-    </div>
+    <ul id="messages"></ul>
+    <form method="post">
+        <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
 </div>
 
+
+<!--<script src="/socket.io/socket.io.js"></script>-->
+<!--<script>-->
+<!--    const socket = io();-->
+<!--</script>-->
 </body>
 </html>

@@ -4,12 +4,9 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cors = require('cors');
 const short = require('short-uuid')('123456789');
+const bodyParser = require('body-parser')
 
-app.use(cors());
-app.get('/', function (req, res) {
-    res.sendFile('index.html', { root: __dirname });
-});
-
+// array for users like temporary db
 let users = [
     {
         id: 1,
@@ -17,6 +14,46 @@ let users = [
         password: 'q1w2e3r4'
     }
 ];
+
+app.use(cors());
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
+
+// get на страницу регистрации
+app.get('/', function (req, res) {
+    res.sendFile('index.html', { root: __dirname });
+});
+
+
+// POST method route
+app.post('/login', function (req, res) {
+    console.log(req.body);
+    const { username, password } = req.body;
+
+    const isUserExist = users.some(user => user.username === username);
+
+    if (isUserExist){
+        return res.status(422).send('We`ve already have user with such login!');
+    }
+    users.push({
+        ...req.body,
+        id: short.generate().slice(0, 8)
+    });
+    res.json({
+        success: 'OK',
+        data: req.body,
+        isUserExist
+    });
+});
+
+//get на chat page
+app.get('/chat', function (req, res) {
+    res.sendFile('index.html', { root: __dirname });
+});
 
 
 app.use(express.static('chat'));
@@ -45,5 +82,18 @@ io.on('connection', function (socket) {
         console.log(users);
     })
 });
+
+
+// app.get('/', function(req, res){
+//     res.sendFile(__dirname + '/chat.html');
+// });
+//
+// io.on('connection', function(socket){
+//     console.log('a user connected');
+// });
+//
+// server.listen(3000, function(){
+//     console.log('listening on *:3000');
+// });
 
 
