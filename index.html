@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
+
 </head>
 <body>
 
@@ -10,14 +12,37 @@
 
 <div class="loginPage">
     <div class="form">
-        <form class= "registration" method="post">
+        <div class="registration" onsubmit="">
             <h1>REGISTRATION</h1>
             <input type="text" name="username" placeholder="username" required>
             <input type="password" name="password" placeholder="password" required>
-            <button type="submit">Enter</button>
-        </form>
+            <button onclick="onSubmit(event)">Enter</button>
+        </div>
     </div>
 </div>
 
+<script>
+    const getValueByName = (name) =>  document.querySelector(`[name=${name}]`).value;
+    // const socket = io.connect('http://localhost:77777');
+    // // const socket = io('http://localhost', {path: 'socket.io'});
+    // socket.on('connected', function (data) {
+    //     console.log(data);
+    // });
+    const socket = io.connect('http://localhost:4001');
+    socket.on('news', function (data) {
+        console.log(data);
+        socket.emit('myNewEvent', {my: 'data'});
+    });
+
+    function onSubmit(e) {
+        console.log('e', e.preventDefault());
+        const username = getValueByName('username');
+        const password = getValueByName('password');
+        socket.emit('login', {
+            username,
+            password
+        })
+    };
+</script>
 </body>
 </html>
