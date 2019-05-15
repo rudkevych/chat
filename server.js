@@ -74,6 +74,15 @@ server.listen(4001);
 //     socket.emit('connected', "Oksana,you are connected");
 // });
 
+// task #4 - сделать колонку "пользователи online". на фронте - сделать блок, где будем выводить всех подключенных сейчас клиетов
+// при подключении к серверу, сервер должен отдать список всех подключенных к нему сейчас клиентов
+// полученный от сервера список - отображаем в сделанном блоке
+
+// поскольку у нас еще нет имен пользователей, можно отдавать случайное число, строчку или порядковый номер
+
+// socket - это работа с конкретным подключением. для каждого открытого подключения - он свой
+// io.sockets - все текущие подключения
+
 io.on('connection', function (socket) {
     socket.emit('news', { hello: 'world' });
     socket.on('myNewEvent', function (data) {
@@ -89,7 +98,8 @@ io.on('connection', function (socket) {
     });
     socket.on('clientMessage', function (data) {
         // получили сообщение от клиента, рассылаем всем остальным клиентам
-        socket.emit('serverMessage', data);
+        // socket.emit('serverMessage', data);
+        io.sockets.emit('serverMessage', data);
 
         console.log('message from client: ', data);
     });
