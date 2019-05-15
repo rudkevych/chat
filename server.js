@@ -6,6 +6,7 @@ const cors = require('cors');
 const short = require('short-uuid')('123456789');
 const bodyParser = require('body-parser');
 
+app.use(cors());
 // array for users like temporary db
 let users = [
     {
@@ -14,8 +15,6 @@ let users = [
         password: 'q1w2e3r4'
     }
 ];
-
-app.use(cors());
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -67,14 +66,7 @@ app.post('/', function (req, res) {
 
 });
 
-
-
-
 app.use(express.static('chat'));
-
-// app.listen(7777, () => {
-//     console.log('server is running on port 7777');
-// });
 
 server.listen(4001);
 
@@ -87,16 +79,21 @@ io.on('connection', function (socket) {
     socket.on('myNewEvent', function (data) {
         console.log('myNewEvent', data);
     });
-    socket.on('login', (data) => {
+    socket.on('login', function (data) {
         console.log('login', data);
         users.push({
             ...data,
             id: short.generate().slice(0, 8)
         });
         console.log(users);
-    })
-});
+    });
+    socket.on('clientMessage', function (data) {
+        // получили сообщение от клиента, рассылаем всем остальным клиентам
+        socket.emit('serverMessage', data);
 
+        console.log('message from client: ', data);
+    });
+});
 
 // app.get('/', function(req, res){
 //     res.sendFile(__dirname + '/chat.html');
@@ -111,3 +108,9 @@ io.on('connection', function (socket) {
 // });
 
 
+io.on('connection', function (socket) {
+    socket.emit('chat', { hello: 'oksana from chat' });
+    // socket.on('chat', function (data) {
+    //     console.log('myNewEvent', data);
+    // })
+});

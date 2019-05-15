@@ -9,16 +9,39 @@
 <body>
 
 <div class=”container”>
-    <ul id="messages"></ul>
+    <ul id="messages">
+    </ul>
     <form method="post">
-        <input id="m" autocomplete="off" /><button>Send</button>
+        <input id="messageField" autocomplete="off">
+        <button id="sendButton" onclick="sendMessage()">Send</button>
     </form>
 </div>
 
 
-<!--<script src="/socket.io/socket.io.js"></script>-->
-<!--<script>-->
-<!--    const socket = io();-->
-<!--</script>-->
+<script>
+    const messageSelector = document.getElementById('messageField');
+    const message = messageSelector.value;
+
+    const socket = io.connect('http://localhost:4001');
+
+    socket.on('chat', function (data) {
+        console.log(data);
+        socket.emit('myNewEvent', {data: 'Hello Oksana'});
+    });
+
+    socket.on('serverMessage', function (data) {
+       console.log('message from server', data);
+       // полученное сообщение от сервера вывести на страницу
+        function  sendMessage() {
+            
+        }
+    });
+
+    document.getElementById('sendButton').addEventListener('click', ()=>{
+        // asdjkashdkjashjkdhas - заменить на значение из поля "messageField"
+        console.log('button click');
+        socket.emit('clientMessage', {data: message});
+    });
+</script>
 </body>
 </html>
