@@ -4,7 +4,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cors = require('cors');
 const short = require('short-uuid')('123456789');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
 // array for users like temporary db
 let users = [
@@ -28,32 +28,46 @@ app.get('/', function (req, res) {
     res.sendFile('index.html', { root: __dirname });
 });
 
+// get на страницу чата
+app.get('/chat', function (req, res) {
+    res.sendFile('chat.html', { root: __dirname });
+});
 
-// POST method route
-app.post('/login', function (req, res) {
+// POST method route, данные польозователя с страницы регистрации
+app.post('/', function (req, res) {
     console.log(req.body);
     const { username, password } = req.body;
+        // if (req.body) {
+        //     res.json({
+        //         success: 'OK',
+        //         data: req.body,
+        //         // isUserExist
+        //         // username,
+        //         // password
+        //     });
+        // }
 
-    const isUserExist = users.some(user => user.username === username);
+    // const isUserExist = users.some(user => user.username === username);
+    //
+    // if (isUserExist){
+    //     return res.status(422).send('We`ve already have user with such login!');
+    // }
+    // users.push({
+    //     ...req.body,
+    //     id: short.generate().slice(0, 8)
+    // });
 
-    if (isUserExist){
-        return res.status(422).send('We`ve already have user with such login!');
-    }
-    users.push({
-        ...req.body,
-        id: short.generate().slice(0, 8)
-    });
     res.json({
         success: 'OK',
         data: req.body,
-        isUserExist
+        // isUserExist
+        // username,
+        // password
     });
+
 });
 
-//get на chat page
-app.get('/chat', function (req, res) {
-    res.sendFile('index.html', { root: __dirname });
-});
+
 
 
 app.use(express.static('chat'));
