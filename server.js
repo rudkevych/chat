@@ -73,9 +73,7 @@ server.listen(4001);
 // task #4 - сделать колонку "пользователи online". на фронте - сделать блок, где будем выводить всех подключенных сейчас клиетов
 // при подключении к серверу, сервер должен отдать список всех подключенных к нему сейчас клиентов
 // полученный от сервера список - отображаем в сделанном блоке
-
 // поскольку у нас еще нет имен пользователей, можно отдавать случайное число, строчку или порядковый номер
-
 // socket - это работа с конкретным подключением. для каждого открытого подключения - он свой
 // io.sockets - все текущие подключения
 
@@ -91,8 +89,8 @@ io.on('connection', function (socket) {
     });
 
     socket.on('clientMessage', function (data) {
-        // получили сообщение от клиента, рассылаем всем остальным клиентам
-        // socket.emit('serverMessage', data);
+        // получили сообщение от клиента, рассылаем всем остальным клиентам - через oi.sockets.emit
+        // socket.emit('serverMessage', data); - работает только с одним пользователем
         io.sockets.emit('serverMessage', data);
         console.log('message from client: ', data);
     });
@@ -109,46 +107,44 @@ io.on('connection', function (socket) {
     //     data: 'a user connected to chat'
     // });
 
-    ////// user online and users counter
-    // let numberOfSockets = Object.keys(socketIO.connected).length;
-    // console.log(numberOfSockets);
+    sendUsersOnlineList();
 
-
-    // ????????????????????????????
-    // io.on('connection', function(socket) {
-    //     console.log(io.sockets.sockets.length);
-    //     socket.on('disconnect', function() {
-    //         console.log(io.sockets.sockets.length);
-    //     });
-    // });
-
-
-    // // список пользователей так же нужно рассылать, когда пользователь отключился (повеситься на событьие disconnect)
-    // io.sockets.length
-    io.sockets.emit('usersList', {
-        data: ['user 1', 'user 2'] // заменить на реальный список пользоватеелй
+    socket.on('disconnect', function(){
+        sendUsersOnlineList();
+        console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
     });
 
-    console.log('count: ', Object.keys(io.sockets.connected).length);
+    function sendUsersOnlineList() {
+        ////// user online and users counter
+        // // список пользователей так же нужно рассылать, когда пользователь отключился (повеситься на событьие disconnect)
+        io.sockets.emit('usersList', {
+            data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
+        });
+    }
 
-
-    // socket.on('connection', function (data) {
-    //     // получили сообщение от клиента, рассылаем всем остальным клиентам
-    //     io.sockets.emit('usersMessage', data);
-    //     console.log('message from client: ', data);
+    // io.sockets.emit('connection', function(){
+    //     console.log('a user connected', Object.keys(io.sockets.connected).length);
+    // });
+    //
+    // io.sockets.emit('disconnect', function(){
+    //     console.log('user disconnected' , Object.keys(io.sockets.connected).length);
     // });
 
-    // let usersOnline = io.sockets.clients('room');
-
-    // io.on('connection', function(socket) {
-    //     console.log(io.sockets.sockets.length);
-    //     socket.on('disconnect', function() {
-    //         console.log(io.sockets.sockets.length);
-    //     });
+    // io.sockets.on('disconnect', {
+    //     data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length]
     // });
+
+    // console.log('quantity of users online: ', Object.keys(io.sockets.connected).length);
 
 });
 
+//
+io.on('connection', function(socket){
+    console.log('a user connected, users online:', Object.keys(io.sockets.connected).length);
+    socket.on('disconnect', function(){
+        console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
+    });
+});
 
 
 
@@ -160,17 +156,6 @@ io.on('connection', function (socket) {
 //
 // });
 
-// app.get('/', function(req, res){
-//     res.sendFile(__dirname + '/chat.html');
-// });
-//
-// io.on('connection', function(socket){
-//     console.log('a user connected');
-// });
-//
-// server.listen(3000, function(){
-//     console.log('listening on *:3000');
-// });
 
 
 
