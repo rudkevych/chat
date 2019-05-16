@@ -59,18 +59,22 @@
 
     });
 
-    ///////// users online
+    ////////////////// users online
 
-    socket.on('onConnect', function (data) {
-        console.log('onConnect', data);
+    socket.on('usersList', function (fromServer) {
+        // console.log('onConnect', data);
         // console.log('message from server about users', data);
         // socket.emit('userMessage', {data: 'Hello from users'});
-        document.getElementById('usersOnline').innerHTML += '<li>' + data.data + '</li>';
+
+        // data = ['user 1', 'user 2'];
+        // data2 = ['<li>user 1</li>', '</li>user 2</li>'];
+        // после join = '<li>user 1</li></li>user 2</li>'
+        document.getElementById('usersOnline').innerHTML = fromServer.data.map((user)=> {
+            return '<li>' +  user  + '</li>';
+        }).join('');
 
     });
 
-
-    // полученное сообщение от сервера вывести на страницу
 
 </script>
 </body>

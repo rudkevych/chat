@@ -104,19 +104,53 @@ io.on('connection', function (socket) {
     // });
 
     // users online
-    // /работает на одну сторону
-    socket.emit('onConnect', {
-        data: 'a user connected to chat'
+    // /работает на одну сторону ???
+    // socket.emit('onConnect', {
+    //     data: 'a user connected to chat'
+    // });
+
+    ////// user online and users counter
+    // let numberOfSockets = Object.keys(socketIO.connected).length;
+    // console.log(numberOfSockets);
+
+
+    // ????????????????????????????
+    // io.on('connection', function(socket) {
+    //     console.log(io.sockets.sockets.length);
+    //     socket.on('disconnect', function() {
+    //         console.log(io.sockets.sockets.length);
+    //     });
+    // });
+
+
+    // // список пользователей так же нужно рассылать, когда пользователь отключился (повеситься на событьие disconnect)
+    // io.sockets.length
+    io.sockets.emit('usersList', {
+        data: ['user 1', 'user 2'] // заменить на реальный список пользоватеелй
     });
 
-    /////////////////// users online
+    console.log('count: ', Object.keys(io.sockets.connected).length);
+
+
     // socket.on('connection', function (data) {
     //     // получили сообщение от клиента, рассылаем всем остальным клиентам
     //     io.sockets.emit('usersMessage', data);
     //     console.log('message from client: ', data);
     // });
 
+    // let usersOnline = io.sockets.clients('room');
+
+    // io.on('connection', function(socket) {
+    //     console.log(io.sockets.sockets.length);
+    //     socket.on('disconnect', function() {
+    //         console.log(io.sockets.sockets.length);
+    //     });
+    // });
+
 });
+
+
+
 
 // io.on('connection', function(socket) {
 //     console.log('a user connected to chat 2');
@@ -125,8 +159,6 @@ io.on('connection', function (socket) {
 //     // });
 //
 // });
-
-
 
 // app.get('/', function(req, res){
 //     res.sendFile(__dirname + '/chat.html');
@@ -141,20 +173,5 @@ io.on('connection', function (socket) {
 // });
 
 
-// io.on('connection', function (socket) {
-//     socket.emit('chat', { hello: 'oksana from chat' });
-//     // socket.on('chat', function (data) {
-//     //     console.log('myNewEvent', data);
-//     // })
-// });
-
-
-
-
-// oi.on('connection', function (socket) {
-//     // получили сообщение от клиента, рассылаем всем остальным клиентам
-//     io.sockets.emit('usersMessage', data);
-//     console.log('message from client: ', data);
-// });
 
 
