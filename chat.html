@@ -8,21 +8,27 @@
 </head>
 <body>
 
-<div class=”container”>
+<div id=”container”>
     <ul id="messages">
     </ul>
     <form>
         <input id="messageField" autocomplete="off">
-        <button id="sendButton" type="reset" >Send</button>
+        <button id="sendButton">Send</button>
     </form>
 </div>
+<div id="usersOnlineWrapper">
+    <p>Users online</p>
+    <ul id="usersOnline">
 
+    </ul>
 
+</div>
 
 <script>
     const messageSelector = document.getElementById('messageField');
     const messagesField = document.getElementById('messages');
     const sendButton = document.getElementById('sendButton');
+    const usersOnline = document.getElementById('usersOnline');
 
     const socket = io.connect('http://localhost:4001');
 
@@ -32,7 +38,7 @@
         socket.emit('myNewEvent', {data: 'Hello Oksana'});
     });
 
-    // получаем сообщение от сервера
+    //////получаем сообщение от сервера
     socket.on('serverMessage', function (fromServer) {
        console.log('message from server', fromServer);
        // полученное сообщение от сервера вывести на страницу
@@ -40,7 +46,7 @@
         // messagesField.appendChild('');
     });
 
-    //  на buttonClick передаем value поля на сервер
+    /////  на buttonClick передаем value поля на сервер
     document.getElementById('sendButton').addEventListener('click', function (e) {
         e.preventDefault();
         const message = messageSelector.value;
@@ -48,9 +54,23 @@
         //console.log('button click');
         socket.emit('clientMessage', {data: message});
 
-        // очищать поле ввода сообщения после того, как отправили сообщение на сервер
+        //  очищать поле ввода сообщения после того, как отправили сообщение на сервер
+        messageSelector.value = '';
+
     });
 
+    ///////// users online
+
+    socket.on('onConnect', function (data) {
+        console.log('onConnect', data);
+        // console.log('message from server about users', data);
+        // socket.emit('userMessage', {data: 'Hello from users'});
+        document.getElementById('usersOnline').innerHTML += '<li>' + data.data + '</li>';
+
+    });
+
+
+    // полученное сообщение от сервера вывести на страницу
 
 </script>
 </body>

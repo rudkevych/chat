@@ -70,10 +70,6 @@ app.use(express.static('chat'));
 
 server.listen(4001);
 
-// io.on('connection', function (socket) {
-//     socket.emit('connected', "Oksana,you are connected");
-// });
-
 // task #4 - сделать колонку "пользователи online". на фронте - сделать блок, где будем выводить всех подключенных сейчас клиетов
 // при подключении к серверу, сервер должен отдать список всех подключенных к нему сейчас клиентов
 // полученный от сервера список - отображаем в сделанном блоке
@@ -84,10 +80,7 @@ server.listen(4001);
 // io.sockets - все текущие подключения
 
 io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('myNewEvent', function (data) {
-        console.log('myNewEvent', data);
-    });
+
     socket.on('login', function (data) {
         console.log('login', data);
         users.push({
@@ -96,14 +89,44 @@ io.on('connection', function (socket) {
         });
         console.log(users);
     });
+
     socket.on('clientMessage', function (data) {
         // получили сообщение от клиента, рассылаем всем остальным клиентам
         // socket.emit('serverMessage', data);
         io.sockets.emit('serverMessage', data);
-
         console.log('message from client: ', data);
     });
+
+    // socket.on('onConnect', function (socket) {
+    //     oi.sockets.emit('onConnect', {
+    //         data: 'a user connected to chat'
+    //     })
+    // });
+
+    // users online
+    // /работает на одну сторону
+    socket.emit('onConnect', {
+        data: 'a user connected to chat'
+    });
+
+    /////////////////// users online
+    // socket.on('connection', function (data) {
+    //     // получили сообщение от клиента, рассылаем всем остальным клиентам
+    //     io.sockets.emit('usersMessage', data);
+    //     console.log('message from client: ', data);
+    // });
+
 });
+
+// io.on('connection', function(socket) {
+//     console.log('a user connected to chat 2');
+//     // socket.on('disconnect', function(){
+//     //     console.log('user disconnected from chat');
+//     // });
+//
+// });
+
+
 
 // app.get('/', function(req, res){
 //     res.sendFile(__dirname + '/chat.html');
@@ -118,9 +141,20 @@ io.on('connection', function (socket) {
 // });
 
 
-io.on('connection', function (socket) {
-    socket.emit('chat', { hello: 'oksana from chat' });
-    // socket.on('chat', function (data) {
-    //     console.log('myNewEvent', data);
-    // })
-});
+// io.on('connection', function (socket) {
+//     socket.emit('chat', { hello: 'oksana from chat' });
+//     // socket.on('chat', function (data) {
+//     //     console.log('myNewEvent', data);
+//     // })
+// });
+
+
+
+
+// oi.on('connection', function (socket) {
+//     // получили сообщение от клиента, рассылаем всем остальным клиентам
+//     io.sockets.emit('usersMessage', data);
+//     console.log('message from client: ', data);
+// });
+
+
