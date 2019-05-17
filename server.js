@@ -7,12 +7,28 @@ const short = require('short-uuid')('123456789');
 const bodyParser = require('body-parser');
 
 app.use(cors());
+
 // array for users like temporary db
 let users = [
     {
         id: 1,
         username: 'admin',
-        password: 'q1w2e3r4'
+        password: 'admin'
+    },
+    {
+        id: 2,
+        username: 'user',
+        password: 'user'
+    },
+    {
+        id: 3,
+        username: 'user3',
+        password: 'user3'
+    },
+    {
+        id: 4,
+        username: 'user4',
+        password: 'user4'
     }
 ];
 
@@ -36,15 +52,51 @@ app.get('/chat', function (req, res) {
 app.post('/', function (req, res) {
     console.log(req.body);
     const { username, password } = req.body;
-        // if (req.body) {
-        //     res.json({
-        //         success: 'OK',
-        //         data: req.body,
-        //         // isUserExist
-        //         // username,
-        //         // password
-        //     });
-        // }
+    //     if (req.body) {
+    //         res.json({
+    //             success: 'OK',
+    //             data: req.body,
+    // //             // isUserExist
+    // //             // username,admin
+    // //             // password
+    //         });
+    //     }
+
+////////////доделать проверку data и обьектов в массиве users
+    let findUser = null;
+    for (let i=0; i<users.length; i++) {
+        let user = users[i];
+        if (user.username === username && user.password === password) {
+            findUser = user;
+            // res.json({
+            //     success: 'OK',
+            //     data: req.body
+            // })
+        // } else {
+            // throw Error ('User with such username doesnt exist');
+            // users.push(req.body);
+        }
+    }
+
+    if (findUser){
+        res.json({
+            success: 'OK',
+            data: findUser
+        });
+    }else{
+        res.sendStatus(422);
+        // res.json({
+        //     success: 'error',
+        //     data: findUser
+        // });
+        // throw Error ('User with such username doesnt exist');
+    }
+
+    // users.some(isUserExist);
+    // function isUserExist (users) {
+    //     let user = users[i];
+    //     return user.username === req.body.username && user.password === req.body.password;
+    // }
 
     // const isUserExist = users.some(user => user.username === username);
     //
@@ -55,15 +107,6 @@ app.post('/', function (req, res) {
     //     ...req.body,
     //     id: short.generate().slice(0, 8)
     // });
-
-    res.json({
-        success: 'OK',
-        data: req.body,
-        // isUserExist
-        // username,
-        // password
-    });
-
 });
 
 app.use(express.static('chat'));
@@ -79,14 +122,14 @@ server.listen(4001);
 
 io.on('connection', function (socket) {
 
-    socket.on('login', function (data) {
-        console.log('login', data);
-        users.push({
-            ...data,
-            id: short.generate().slice(0, 8)
-        });
-        console.log(users);
-    });
+    // socket.on('login', function (data) {
+    //     console.log('login', data);
+    //     users.push({
+    //         ...data,
+    //         id: short.generate().slice(0, 8)
+    //     });
+    //     console.log(users);
+    // });
 
     socket.on('clientMessage', function (data) {
         // получили сообщение от клиента, рассылаем всем остальным клиентам - через oi.sockets.emit
@@ -101,8 +144,7 @@ io.on('connection', function (socket) {
     //     })
     // });
 
-    // users online
-    // /работает на одну сторону ???
+    // users online работает на одну сторону ???
     // socket.emit('onConnect', {
     //     data: 'a user connected to chat'
     // });
