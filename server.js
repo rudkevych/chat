@@ -3,34 +3,54 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cors = require('cors');
-const short = require('short-uuid')('123456789');
+// const short = require('short-uuid')('123456789');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
+// mongoose.connect('mongodb://localhost/4001', {useNewUrlParser: true});
+mongoose.connect("mongodb://localhost:4001/chat",  { useNewUrlParser: true } );
+
+const db = mongoose.connection;
+// Привязать подключение к событию ошибки  (получать сообщения об ошибках подключения)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+db.once('open', function() {
+    // we're connected!
+});
+
+const Schema = mongoose.Schema;
+let usersSchema = new Schema({
+    username: String,
+    password: String,
+    _id: mongoose.Schema.Types.ObjectId
+});
+
+let Users = mongoose.model("User", usersSchema);
 
 app.use(cors());
 
 // array for users like temporary db
-let users = [
-    {
-        id: 1,
-        username: 'admin',
-        password: 'admin'
-    },
-    {
-        id: 2,
-        username: 'user',
-        password: 'user'
-    },
-    {
-        id: 3,
-        username: 'user3',
-        password: 'user3'
-    },
-    {
-        id: 4,
-        username: 'user4',
-        password: 'user4'
-    }
-];
+// let users = [
+//     {
+//         id: 1,
+//         username: 'admin',
+//         password: 'admin'
+//     },
+//     {
+//         id: 2,
+//         username: 'user',
+//         password: 'user'
+//     },
+//     {
+//         id: 3,
+//         username: 'user3',
+//         password: 'user3'
+//     },
+//     {
+//         id: 4,
+//         username: 'user4',
+//         password: 'user4'
+//     }
+// ];
 
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -62,35 +82,50 @@ app.post('/', function (req, res) {
     //         });
     //     }
 
-////////////доделать проверку data и обьектов в массиве users
-    let findUser = null;
-    for (let i=0; i<users.length; i++) {
-        let user = users[i];
-        if (user.username === username && user.password === password) {
-            findUser = user;
-            // res.json({
-            //     success: 'OK',
-            //     data: req.body
-            // })
-        // } else {
-            // throw Error ('User with such username doesnt exist');
-            // users.push(req.body);
-        }
-    }
+////////////ДОДЕЛАТЬ проверка data from inputs и обьектов в массиве users
+//     if (!username || !password) {
+//         return res.sendStatus(403);
+//     } else {
+//         Users.findOne({"username": username, "password": password}, function (err, result) {
+//             if (err || !result) {
+//                 return res.sendStatus(403);
+//             } else { return res.sendStatus(200);
+//             }
+//         })
+//     }
 
-    if (findUser){
-        res.json({
-            success: 'OK',
-            data: findUser
-        });
-    }else{
-        res.sendStatus(422);
-        // res.json({
-        //     success: 'error',
-        //     data: findUser
-        // });
-        // throw Error ('User with such username doesnt exist');
-    }
+    let findUser = Users.findOne({"username": username}, {"password": password});
+
+    /// добавить поиск по базе данныъ query find one
+
+    // поиск по массиву на сервере => заменяем на посик в базе данных
+    // for (let i=0; i<users.length; i++) {
+    //     let user = users[i];
+    //     if (user.username === username && user.password === password) {
+    //         findUser = user;
+    //         // res.json({
+    //         //     success: 'OK',
+    //         //     data: req.body
+    //         // })
+    //     // } else {
+    //         // throw Error ('User with such username doesnt exist');
+    //         // users.push(req.body);
+    //     }
+    // }
+
+    // if (findUser){
+    //     res.json({
+    //         success: 'OK',
+    //         data: findUser
+    //     });
+    // } else {
+    //     res.sendStatus(422);
+    //     // res.json({
+    //     //     success: 'error',
+    //     //     data: findUser
+    //     // });
+    //     // throw Error ('User with such username doesnt exist');
+    // }
 
     // users.some(isUserExist);
     // function isUserExist (users) {
@@ -138,12 +173,6 @@ io.on('connection', function (socket) {
         console.log('message from client: ', data);
     });
 
-    // socket.on('onConnect', function (socket) {
-    //     oi.sockets.emit('onConnect', {
-    //         data: 'a user connected to chat'
-    //     })
-    // });
-
     // users online работает на одну сторону ???
     // socket.emit('onConnect', {
     //     data: 'a user connected to chat'
@@ -163,32 +192,14 @@ io.on('connection', function (socket) {
             data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
         });
     }
-
-    // io.sockets.emit('connection', function(){
-    //     console.log('a user connected', Object.keys(io.sockets.connected).length);
-    // });
-    //
-    // io.sockets.emit('disconnect', function(){
-    //     console.log('user disconnected' , Object.keys(io.sockets.connected).length);
-    // });
-
-    // io.sockets.on('disconnect', {
-    //     data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length]
-    // });
-
-    // console.log('quantity of users online: ', Object.keys(io.sockets.connected).length);
-
 });
 
-//
 io.on('connection', function(socket){
     console.log('a user connected, users online:', Object.keys(io.sockets.connected).length);
     socket.on('disconnect', function(){
         console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
     });
 });
-
-
 
 // io.on('connection', function(socket) {
 //     console.log('a user connected to chat 2');
