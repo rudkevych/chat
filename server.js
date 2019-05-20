@@ -7,24 +7,21 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
-// mongoose.connect('mongodb://localhost/4001', {useNewUrlParser: true});
-mongoose.connect("mongodb://localhost:4001/chat",  { useNewUrlParser: true } );
-
+mongoose.connect("mongodb://localhost:27017/chatUsers",  { useNewUrlParser: true } );
 const db = mongoose.connection;
+
 // Привязать подключение к событию ошибки  (получать сообщения об ошибках подключения)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
-    // we're connected!
+    console.log('We are connected db open');
 });
 
-const Schema = mongoose.Schema;
-let usersSchema = new Schema({
+let usersSchema = new mongoose.Schema({
     username: String,
     password: String,
-    _id: mongoose.Schema.Types.ObjectId
 });
 
-let Users = mongoose.model("User", usersSchema);
+let User = mongoose.model("user", usersSchema);
 
 app.use(cors());
 
@@ -69,8 +66,7 @@ app.get('/chat', function (req, res) {
 });
 
 // POST method route, данные польозователя с страницы регистрации
-app.post('/', function (req, res) {
-    console.log(req.body);
+app.post('/', async (req, res) => {
     const { username, password } = req.body;
     //     if (req.body) {
     //         res.json({
@@ -82,7 +78,7 @@ app.post('/', function (req, res) {
     //         });
     //     }
 
-////////////ДОДЕЛАТЬ проверка data from inputs и обьектов в массиве users
+////////////ДОДЕЛАТЬ проверку data from inputs и обьектов в массиве users
 //     if (!username || !password) {
 //         return res.sendStatus(403);
 //     } else {
@@ -93,8 +89,22 @@ app.post('/', function (req, res) {
 //             }
 //         })
 //     }
+    try {
+        let user = await User.findOne({username, password});
+        console.log('user', user);
+        if (user) {
+            console.log("User successfully found in database");
+            res.json({
+                        success: 'OK',
+                        data: req.body
+                    })
+        } else console.log("User doesnt exist or password not correct");
+        // db.getCollection('users').find({})
+    } catch (e) {
+        console.error("E, login,", e);
+        console.log('error in checking field');
+    }
 
-    let findUser = Users.findOne({"username": username}, {"password": password});
 
     /// добавить поиск по базе данныъ query find one
 
@@ -127,21 +137,7 @@ app.post('/', function (req, res) {
     //     // throw Error ('User with such username doesnt exist');
     // }
 
-    // users.some(isUserExist);
-    // function isUserExist (users) {
-    //     let user = users[i];
-    //     return user.username === req.body.username && user.password === req.body.password;
-    // }
 
-    // const isUserExist = users.some(user => user.username === username);
-    //
-    // if (isUserExist){
-    //     return res.status(422).send('We`ve already have user with such login!');
-    // }
-    // users.push({
-    //     ...req.body,
-    //     id: short.generate().slice(0, 8)
-    // });
 });
 
 app.use(express.static('chat'));
