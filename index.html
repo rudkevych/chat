@@ -20,15 +20,17 @@
 
 
 </style>
-<h1>Hello Oksana there</h1>
+<h1 style="color: darkorange">MaybeWorks Chat</h1>
 
 <div class="loginPage">
     <div class="form">
         <form class="registration" onsubmit="">
             <h1>REGISTRATION</h1>
-            <input type="text" class="input" name="username" placeholder="username" required>
-            <input type="password" name="password" placeholder="password" required>
-            <button onclick="onSubmit(event)">Enter</button>
+            <input type="text" class="input" name="username" placeholder="username" autocomplete="off" pattern="[0-9a-zA-Z]{3,}"
+                   required title="3 characters minimum without special characters" minlength="3">
+<!--            <p>Username must be at minimum 3 characters length and without special characters</p>-->
+            <input type="password" name="password" placeholder="password" required> <br><br>
+            <button onclick="onSubmit(event)">GO</button>
         </form>
     </div>
 </div>
@@ -55,10 +57,7 @@
 
         const username = userSelector.value;
         const password = passSelector.value;
-        // socket.emit('login', {
-        //     username,
-        //     password
-        // })
+
         try {
             let response =  await axios.post('/', {
                 username,

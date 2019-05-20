@@ -79,7 +79,6 @@ app.post('/', async (req, res) => {
     // //             // password
     //         });
     //     }
-
 ////////////ДОДЕЛАТЬ проверку data from inputs и обьектов в массиве users
 //     if (!username || !password) {
 //         return res.sendStatus(403);
@@ -92,19 +91,51 @@ app.post('/', async (req, res) => {
 //         })
 //     }
     try {
-        let user = await User.findOne({username, password});
+        // let user = await User.findOne({username, password});
+        // console.log('user', user);
+        // if (user) {
+        //     console.log("User successfully found in database");
+        //     res.json({
+        //         success: 'OK',
+        //         data: req.body
+        //     })
+        // } else {
+        //     console.log("User doesnt exist or password not correct and we have to add him to dbs");
+        //     // добавить проверку на не пустые values in user
+        //     let userCreate = await User.create({
+        //         username: username,
+        //         password: password
+        //     });
+        //     res.json({
+        //         success: 'OK',
+        //         data: req.body
+        //     });
+        //     userCreate();
+        // }
+
+        let user = await User.findOne({username});
         console.log('user', user);
         if (user) {
-            console.log("User successfully found in database");
-            res.json({
-                        success: 'OK',
-                        data: req.body
-                    })
+            console.log("User found in database");
+            let userPassword = await User.findOne({password});
+            if (userPassword) {
+                res.json({
+                    success: 'OK',
+                    data: req.body
+                })
+            } else {
+                console.log('Password is not correct');
+            }
         } else {
-            console.log("User doesnt exist or password not correct and we have to add him to dbs");
+            console.log("User doesnt exist so we add him to the database");
+            // добавить проверку на не пустые values in user
             let userCreate = await User.create({
                 username: username,
                 password: password
+            });
+            res.json({
+                success: 'OK',
+                data: req.body
             });
             userCreate();
         }
@@ -129,20 +160,6 @@ app.post('/', async (req, res) => {
     //         // throw Error ('User with such username doesnt exist');
     //         // users.push(req.body);
     //     }
-    // }
-
-    // if (findUser){
-    //     res.json({
-    //         success: 'OK',
-    //         data: findUser
-    //     });
-    // } else {
-    //     res.sendStatus(422);
-    //     // res.json({
-    //     //     success: 'error',
-    //     //     data: findUser
-    //     // });
-    //     // throw Error ('User with such username doesnt exist');
     // }
 
 
