@@ -13,12 +13,15 @@
         background: #ececec;
 
     }
+    button {
+        width: 200px;
+        height: 50px;
 
-    /*.error {*/
-    /*    box-shadow: 0 0 0 1px red;*/
-    /*}*/
+    }
 
-
+    .error{
+        background: red;
+    }
 </style>
 <h1 style="color: darkorange">MaybeWorks Chat</h1>
 
@@ -28,9 +31,9 @@
             <h1>REGISTRATION</h1>
             <input type="text" class="input" name="username" placeholder="username" autocomplete="off" pattern="[0-9a-zA-Z]{3,}"
                    required title="3 characters minimum without special characters" minlength="3">
-<!--            <p>Username must be at minimum 3 characters length and without special characters</p>-->
             <input type="password" name="password" placeholder="password" required> <br><br>
             <button onclick="onSubmit(event)">GO</button>
+            <p id="errorField"></p>
         </form>
     </div>
 </div>
@@ -52,26 +55,54 @@
     });
 
     const onSubmit = async (e) => {
-        console.log('e', e.preventDefault());
+        e.preventDefault();
+        // console.log('e', e.preventDefault());
         getValueByName('username').className = '';
 
         const username = userSelector.value;
         const password = passSelector.value;
 
-        try {
-            let response =  await axios.post('/', {
-                username,
-                password
-            });
-            localStorage.setItem('user', JSON.stringify(response.data));
-            window.location.href = "/chat";
+        // first version - skip empty fields
+        // try {
+        //     let response =  await axios.post('/', {
+        //         username,
+        //         password
+        //     });
+        //     localStorage.setItem('user', JSON.stringify(response.data));
+        //     window.location.href = "/chat";
+        //
+        // } catch (e) {
+        //     userSelector.className = 'error';
+        //     console.log('Login is error');
+        // }
 
-        } catch (e) {
-            userSelector.className = 'error';
-            console.log('Login is error');
+        if(username === '' || password === '') {
+            document.getElementById('errorField').innerHTML = '';
+            let emptyError = 'Username or passport field cant be empty. Please enter your data ';
+            document.getElementById('errorField').innerHTML += emptyError;
+        } else {
+            try {
+                let response = await axios.post('/', {
+                    username,
+                    password
+                });
+                localStorage.setItem('user', JSON.stringify(response.data));
+                window.location.href = "/chat";
+
+            } catch (e) {
+                userSelector.className = 'error';
+                document.getElementById('errorField').innerHTML += 'You entered wrong password, Please try again';
+                console.log('Login is error');
+            }
         }
-
     };
+
+    // socket.on('wrongPass', function (message) {
+    //     console.log(data);
+    //     document.getElementById('errorField').innerHTML = '';
+    //     document.getElementById('errorField').innerHTML += data ;
+    //     // document.getElementById('errorField').innerHTML += '<p>' +  data  + '</p>';
+    // });
 
 </script>
 </body>

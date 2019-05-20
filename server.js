@@ -18,7 +18,8 @@ db.once('open', function() {
 
 let usersSchema = new mongoose.Schema({
     username: String,
-    password: String
+    password: String,
+    token: String
 }, {
     versionKey: false
 });
@@ -70,27 +71,8 @@ app.get('/chat', function (req, res) {
 // POST method route, данные польозователя с страницы регистрации
 app.post('/', async (req, res) => {
     const { username, password } = req.body;
-    //     if (req.body) {
-    //         res.json({
-    //             success: 'OK',
-    //             data: req.body,
-    // //             // isUserExist
-    // //             // username,admin
-    // //             // password
-    //         });
-    //     }
-////////////ДОДЕЛАТЬ проверку data from inputs и обьектов в массиве users
-//     if (!username || !password) {
-//         return res.sendStatus(403);
-//     } else {
-//         Users.findOne({"username": username, "password": password}, function (err, result) {
-//             if (err || !result) {
-//                 return res.sendStatus(403);
-//             } else { return res.sendStatus(200);
-//             }
-//         })
-//     }
     try {
+        // without password checking
         // let user = await User.findOne({username, password});
         // console.log('user', user);
         // if (user) {
@@ -114,7 +96,7 @@ app.post('/', async (req, res) => {
         // }
 
         let user = await User.findOne({username});
-        console.log('user', user);
+        // console.log('user', user);
         if (user) {
             console.log("User found in database");
             let userPassword = await User.findOne({password});
@@ -124,14 +106,35 @@ app.post('/', async (req, res) => {
                     data: req.body
                 })
             } else {
-                console.log('Password is not correct');
+                // io.emit('wrongPassword', {
+                //     data: 'You entered wrong password, Please try again'
+                // });
+                res.status(422).json({
+                    success: 'ERROR',
+                    data: 'You entered wrong password, Please try again'
+                });
+                // io.sockets.on('wrongPass', function (socket) {
+                //     socket.send('wrong pass');
+                // });
+
+                console.log('but password is not correct');
             }
         } else {
-            console.log("User doesnt exist so we add him to the database");
+            console.log("User doesnt exist so we will add him to the database");
             // добавить проверку на не пустые values in user
+            function generateToken() {
+                let result  = '';
+                let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let charactersLength = characters.length;
+                for (let i = 0; i < 32; i++ ) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                }
+                return result;
+            }
             let userCreate = await User.create({
                 username: username,
-                password: password
+                password: password,
+                token: generateToken()
             });
             res.json({
                 success: 'OK',
@@ -143,8 +146,6 @@ app.post('/', async (req, res) => {
         console.error("E, login,", e);
         console.log('error in checking field');
     }
-
-
     /// добавить поиск по базе данныъ query find one
 
     // поиск по массиву на сервере => заменяем на посик в базе данных
@@ -202,7 +203,7 @@ io.on('connection', function (socket) {
 
     socket.on('disconnect', function(){
         sendUsersOnlineList();
-        console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
+        // console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
     });
 
     function sendUsersOnlineList() {
@@ -215,19 +216,12 @@ io.on('connection', function (socket) {
 });
 
 io.on('connection', function(socket){
-    console.log('a user connected, users online:', Object.keys(io.sockets.connected).length);
+    // console.log('a user connected, users online:', Object.keys(io.sockets.connected).length);
     socket.on('disconnect', function(){
-        console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
+        // console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
     });
 });
 
-// io.on('connection', function(socket) {
-//     console.log('a user connected to chat 2');
-//     // socket.on('disconnect', function(){
-//     //     console.log('user disconnected from chat');
-//     // });
-//
-// });
 
 
 
