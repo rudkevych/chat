@@ -18,7 +18,9 @@ db.once('open', function() {
 
 let usersSchema = new mongoose.Schema({
     username: String,
-    password: String,
+    password: String
+}, {
+    versionKey: false
 });
 
 let User = mongoose.model("user", usersSchema);
@@ -98,8 +100,14 @@ app.post('/', async (req, res) => {
                         success: 'OK',
                         data: req.body
                     })
-        } else console.log("User doesnt exist or password not correct");
-        // db.getCollection('users').find({})
+        } else {
+            console.log("User doesnt exist or password not correct and we have to add him to dbs");
+            let userCreate = await User.create({
+                username: username,
+                password: password
+            });
+            userCreate();
+        }
     } catch (e) {
         console.error("E, login,", e);
         console.log('error in checking field');
@@ -141,7 +149,6 @@ app.post('/', async (req, res) => {
 });
 
 app.use(express.static('chat'));
-
 server.listen(4001);
 
 // task #4 - сделать колонку "пользователи online". на фронте - сделать блок, где будем выводить всех подключенных сейчас клиетов

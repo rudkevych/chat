@@ -12,7 +12,7 @@
     <ul id="messages">
     </ul>
     <form>
-        <input id="messageField" autocomplete="off">
+        <input id="messageField" autocomplete="off" pattern="[0-9a-zA-Z]{3,}">
         <button id="sendButton">Send</button>
     </form>
 </div>
@@ -77,3 +77,6 @@
 </script>
 </body>
 </html>
+
+
+<!--regexp    /^[0-9a-zA-Z]{3,}$/         -->
