@@ -14,6 +14,7 @@
     <form>
         <input id="messageField" autocomplete="off">
         <button id="sendButton">Send</button>
+        <button id="logoutButton">LOGOUT</button>
     </form>
 </div>
 <div id="usersOnlineWrapper">
@@ -30,7 +31,7 @@
     const sendButton = document.getElementById('sendButton');
     const usersOnline = document.getElementById('usersOnline');
 
-    const socket = io.connect('http://localhost:4001');
+    const socket = io.connect('http://localhost:4001?token=sdjkfhsjkhfkjsdhf');
 
     // test
     socket.on('chat', function (data) {

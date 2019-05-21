@@ -3,18 +3,31 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const cors = require('cors');
-// const short = require('short-uuid')('123456789');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const session = require('express-session');
+
+// хэширование пароля
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+const myPlaintextPassword = 's0/\/\P4$$w0rD';
+const someOtherPlaintextPassword = 'not_bacon';
 
 mongoose.connect("mongodb://localhost:27017/chatUsers",  { useNewUrlParser: true } );
 const db = mongoose.connection;
-
 // Привязать подключение к событию ошибки  (получать сообщения об ошибках подключения)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
     console.log('We are connected db open');
 });
+
+/// express sessions
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
 let usersSchema = new mongoose.Schema({
     username: String,
@@ -60,11 +73,24 @@ app.use(bodyParser.json());
 
 // get на страницу регистрации
 app.get('/', function (req, res) {
+    if (req.session.user) {
+        //console.log('redirect');
+        return res.redirect('/chat');
+    }
     res.sendFile('index.html', { root: __dirname });
+});
+
+app.get('/logout', (req, res)=>{
+    req.session.user = null;
+    res.redirect('/');
 });
 
 // get на страницу чата
 app.get('/chat', function (req, res) {
+    //console.log('user',req.session.user);
+    if (!req.session.user) {
+       return res.redirect('/');
+    }
     res.sendFile('chat.html', { root: __dirname });
 });
 
@@ -101,22 +127,16 @@ app.post('/', async (req, res) => {
             console.log("User found in database");
             let userPassword = await User.findOne({password});
             if (userPassword) {
+                req.session.user = user;
                 res.json({
                     success: 'OK',
                     data: req.body
                 })
             } else {
-                // io.emit('wrongPassword', {
-                //     data: 'You entered wrong password, Please try again'
-                // });
                 res.status(422).json({
                     success: 'ERROR',
                     data: 'You entered wrong password, Please try again'
                 });
-                // io.sockets.on('wrongPass', function (socket) {
-                //     socket.send('wrong pass');
-                // });
-
                 console.log('but password is not correct');
             }
         } else {
@@ -136,6 +156,7 @@ app.post('/', async (req, res) => {
                 password: password,
                 token: generateToken()
             });
+            req.session.user = userCreate;
             res.json({
                 success: 'OK',
                 data: req.body
@@ -146,7 +167,6 @@ app.post('/', async (req, res) => {
         console.error("E, login,", e);
         console.log('error in checking field');
     }
-    /// добавить поиск по базе данныъ query find one
 
     // поиск по массиву на сервере => заменяем на посик в базе данных
     // for (let i=0; i<users.length; i++) {
@@ -162,30 +182,17 @@ app.post('/', async (req, res) => {
     //         // users.push(req.body);
     //     }
     // }
-
-
 });
 
 app.use(express.static('chat'));
 server.listen(4001);
 
-// task #4 - сделать колонку "пользователи online". на фронте - сделать блок, где будем выводить всех подключенных сейчас клиетов
-// при подключении к серверу, сервер должен отдать список всех подключенных к нему сейчас клиентов
-// полученный от сервера список - отображаем в сделанном блоке
-// поскольку у нас еще нет имен пользователей, можно отдавать случайное число, строчку или порядковый номер
-// socket - это работа с конкретным подключением. для каждого открытого подключения - он свой
-// io.sockets - все текущие подключения
-
 io.on('connection', function (socket) {
 
-    // socket.on('login', function (data) {
-    //     console.log('login', data);
-    //     users.push({
-    //         ...data,
-    //         id: short.generate().slice(0, 8)
-    //     });
-    //     console.log(users);
-    // });
+    // при подключении пользователя, нужно получить из данных подключения его токен (добавить в сокет на фронте)
+    // по этому токену нужно найти пользователя в бд
+    // проверить токен, если пользователя не нашли - запрещаем вход и отключаем клиента от сокет-сервера
+    // если пользователя нашли по токену - нужно проверить, забанен ли он. если да - отключаем от сокет-сервера
 
     socket.on('clientMessage', function (data) {
         // получили сообщение от клиента, рассылаем всем остальным клиентам - через oi.sockets.emit
@@ -193,12 +200,10 @@ io.on('connection', function (socket) {
         io.sockets.emit('serverMessage', data);
         console.log('message from client: ', data);
     });
-
     // users online работает на одну сторону ???
     // socket.emit('onConnect', {
     //     data: 'a user connected to chat'
     // });
-
     sendUsersOnlineList();
 
     socket.on('disconnect', function(){
@@ -223,6 +228,28 @@ io.on('connection', function(socket){
 });
 
 
+
+app.get('/item', function(req, res) {
+    req.session.message = 'Hello World';
+});
+
+app.use(function (req, res, next) {
+    if (!req.session.views) {
+        req.session.views = {}
+    }
+    // get the url pathname
+    let pathname = parseurl(req).pathname;
+
+    // count the views
+    req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
+
+    next()
+});
+
+app.get('/', function (req, res, next) {
+    res.send('you viewed this page ' + req.session.views['/chat'] + ' times');
+    console.log('you viewed this page ' + req.session.views['/chat'] + ' times');
+});
 
 
 
