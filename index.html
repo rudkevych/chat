@@ -35,7 +35,6 @@
             <button onclick="onSubmit(event)">GO</button>
             <p id="errorField"></p>
         </form>
-        </form>
     </div>
 </div>
 
@@ -49,7 +48,20 @@
     // socket.on('connected', function (data) {
     //     console.log(data);
     // });
-    const socket = io.connect('http://localhost:4001');
+
+    const user = localStorage.getItem('user');
+    let token = '';
+    console.log(user);
+    if(user) {
+        token = JSON.parse(user).data.token;
+    }
+    const socket = io.connect(`http://localhost:4001?token=${token}`);
+    // const socket = io.connect('http://localhost:4001', {
+    //     query: {
+    //         token:
+    //     }
+    // }); // передать токен??
+
     socket.on('news', function (data) {
         console.log(data);
         socket.emit('myNewEvent', {my: 'data'});
@@ -99,12 +111,6 @@
         }
     };
 
-    // socket.on('wrongPass', function (message) {
-    //     console.log(data);
-    //     document.getElementById('errorField').innerHTML = '';
-    //     document.getElementById('errorField').innerHTML += data ;
-    //     // document.getElementById('errorField').innerHTML += '<p>' +  data  + '</p>';
-    // });
 
 </script>
 </body>

@@ -18,7 +18,7 @@ const db = mongoose.connection;
 // Привязать подключение к событию ошибки  (получать сообщения об ошибках подключения)
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', function() {
-    console.log('We are connected db open');
+    // console.log('We are connected db open');
 });
 
 /// express sessions
@@ -78,6 +78,8 @@ app.get('/', function (req, res) {
         return res.redirect('/chat');
     }
     res.sendFile('index.html', { root: __dirname });
+    // let token = usersSchema.token;
+    // console.log('token ' + token);
 });
 
 app.get('/logout', (req, res)=>{
@@ -89,9 +91,10 @@ app.get('/logout', (req, res)=>{
 app.get('/chat', function (req, res) {
     //console.log('user',req.session.user);
     if (!req.session.user) {
-       return res.redirect('/');
+        return res.redirect('/');
     }
     res.sendFile('chat.html', { root: __dirname });
+    //
 });
 
 // POST method route, данные польозователя с страницы регистрации
@@ -125,13 +128,16 @@ app.post('/', async (req, res) => {
         // console.log('user', user);
         if (user) {
             console.log("User found in database");
-            let userPassword = await User.findOne({password});
-            if (userPassword) {
+            let userByPass = await User.findOne({password: password});
+            if (userByPass) {
                 req.session.user = user;
                 res.json({
                     success: 'OK',
-                    data: req.body
-                })
+                    data: {username: username, token: userByPass.token}
+                });
+                // for(let keys in req.body) {
+                //     console.log(req.body[keys]);
+                // }
             } else {
                 res.status(422).json({
                     success: 'ERROR',
@@ -151,17 +157,18 @@ app.post('/', async (req, res) => {
                 }
                 return result;
             }
+            const token = generateToken();
             let userCreate = await User.create({
                 username: username,
                 password: password,
-                token: generateToken()
+                token: token
             });
             req.session.user = userCreate;
             res.json({
                 success: 'OK',
-                data: req.body
+                data: {username: username, token: token}
             });
-            userCreate();
+            // userCreate();
         }
     } catch (e) {
         console.error("E, login,", e);
@@ -188,8 +195,10 @@ app.use(express.static('chat'));
 server.listen(4001);
 
 io.on('connection', function (socket) {
+    let token = socket.handshake.query.token;
+        console.log(socket.handshake.query.token);
 
-    // при подключении пользователя, нужно получить из данных подключения его токен (добавить в сокет на фронте)
+    // при подключении пользователя, нужно получить из данных подключения его токен (
     // по этому токену нужно найти пользователя в бд
     // проверить токен, если пользователя не нашли - запрещаем вход и отключаем клиента от сокет-сервера
     // если пользователя нашли по токену - нужно проверить, забанен ли он. если да - отключаем от сокет-сервера
@@ -200,10 +209,7 @@ io.on('connection', function (socket) {
         io.sockets.emit('serverMessage', data);
         console.log('message from client: ', data);
     });
-    // users online работает на одну сторону ???
-    // socket.emit('onConnect', {
-    //     data: 'a user connected to chat'
-    // });
+
     sendUsersOnlineList();
 
     socket.on('disconnect', function(){
@@ -233,24 +239,16 @@ app.get('/item', function(req, res) {
     req.session.message = 'Hello World';
 });
 
-app.use(function (req, res, next) {
-    if (!req.session.views) {
-        req.session.views = {}
-    }
-    // get the url pathname
-    let pathname = parseurl(req).pathname;
-
-    // count the views
-    req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
-
-    next()
-});
-
-app.get('/', function (req, res, next) {
-    res.send('you viewed this page ' + req.session.views['/chat'] + ' times');
-    console.log('you viewed this page ' + req.session.views['/chat'] + ' times');
-});
-
-
-
+// app.use(function (req, res, next) {
+//     if (!req.session.views) {
+//         req.session.views = {}
+//     }
+//     // get the url pathname
+//     let pathname = parseurl(req).pathname;
+//
+//     // count the views
+//     req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
+//
+//     next()
+// });
 

@@ -30,37 +30,40 @@
     const messagesField = document.getElementById('messages');
     const sendButton = document.getElementById('sendButton');
     const usersOnline = document.getElementById('usersOnline');
+    const user = localStorage.getItem('user');
+    let token = '';
+    console.log(user);
+    if(user) {
+        token = JSON.parse(user).data.token;
+    }
 
-    const socket = io.connect('http://localhost:4001?token=sdjkfhsjkhfkjsdhf');
-
-    // test
+    const socket = io.connect(`http://localhost:4001?token=${token}`);
+    // const socket = io.connect('http://localhost:4001', {
+    //     query: {
+    //         token:
+    //     }
+    // });
+    // // test
     socket.on('chat', function (data) {
         console.log(data);
         socket.emit('myNewEvent', {data: 'Hello Oksana'});
     });
-
     //////получаем сообщение от сервера
     socket.on('serverMessage', function (fromServer) {
-       console.log('message from server', fromServer);
-       // полученное сообщение от сервера вывести на страницу
+        console.log('message from server', fromServer);
+        // полученное сообщение от сервера вывести на страницу
         document.getElementById('messages').innerHTML += '<li>' + fromServer.data + '</li>';
     });
-
     /////  на buttonClick передаем value поля на сервер
     document.getElementById('sendButton').addEventListener('click', function (e) {
         e.preventDefault();
         const message = messageSelector.value;
-
         //console.log('button click');
         socket.emit('clientMessage', {data: message});
-
         //  очищать поле ввода сообщения после того, как отправили сообщение на сервер
         messageSelector.value = '';
-
     });
-
     ////////////////// users online
-
     socket.on('usersList', function (fromServer) {
         // console.log('onConnect', data);
         // console.log('message from server about users', data);
@@ -71,12 +74,7 @@
         document.getElementById('usersOnline').innerHTML = fromServer.data.map((user)=> {
             return '<li>' +  user  + '</li>';
         }).join('');
-
     });
-
-
-
-
 </script>
 </body>
 </html>
