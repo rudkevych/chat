@@ -32,7 +32,9 @@ app.use(session({
 let usersSchema = new mongoose.Schema({
     username: String,
     password: String,
-    token: String
+    token: String,
+    isBanned: { type: Boolean, default: false},
+    isMuted: { type: Boolean, default: false}
 }, {
     versionKey: false
 });
@@ -94,7 +96,10 @@ app.get('/chat', function (req, res) {
         return res.redirect('/');
     }
     res.sendFile('chat.html', { root: __dirname });
-    //
+    // if(!token) {
+    //     return res.redirect('/');
+    // }
+
 });
 
 // POST method route, данные польозователя с страницы регистрации
@@ -175,7 +180,7 @@ app.post('/', async (req, res) => {
         console.log('error in checking field');
     }
 
-    // поиск по массиву на сервере => заменяем на посик в базе данных
+    // поиск по массиву на сервере => заменяем на поиск в базе данных
     // for (let i=0; i<users.length; i++) {
     //     let user = users[i];
     //     if (user.username === username && user.password === password) {
@@ -194,9 +199,31 @@ app.post('/', async (req, res) => {
 app.use(express.static('chat'));
 server.listen(4001);
 
-io.on('connection', function (socket) {
+io.on('connection', async function (socket) {
     let token = socket.handshake.query.token;
         console.log(socket.handshake.query.token);
+
+    // if (!token) {
+    //     // socket.close();
+    //     throw Error ('Error with token')
+    // }
+
+    let userByToken =  await User.findOne({token});
+    console.log('userByToken ', userByToken);
+
+    // пользователю добавить колонку в бд - isBanned
+    if (!userByToken || userByToken.isBanned){
+        // отключаем пользователя и заканчиваем выполнения данного замыкания
+        socket.disconnect();
+        // socket.close();
+        // app.get('/banned', (req, res)=>{
+        //     res.redirect('/');
+        // });
+
+        // socket.on('forceDisconnect', function(){
+        //     socket.disconnect();
+        // });
+    }
 
     // при подключении пользователя, нужно получить из данных подключения его токен (
     // по этому токену нужно найти пользователя в бд
