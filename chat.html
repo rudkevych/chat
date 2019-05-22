@@ -36,7 +36,11 @@
     if(user) {
         token = JSON.parse(user).data.token;
     }
+    console.log(token);
 
+    // if(!token) {
+    //     socket.disconnect();
+    // }
     const socket = io.connect(`http://localhost:4001?token=${token}`);
     // const socket = io.connect('http://localhost:4001', {
     //     query: {
@@ -75,6 +79,7 @@
             return '<li>' +  user  + '</li>';
         }).join('');
     });
+
 </script>
 </body>
 </html>

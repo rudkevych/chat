@@ -55,10 +55,11 @@
     if(user) {
         token = JSON.parse(user).data.token;
     }
+    console.log(token);
     const socket = io.connect(`http://localhost:4001?token=${token}`);
     // const socket = io.connect('http://localhost:4001', {
     //     query: {
-    //         token:
+    //         token: token
     //     }
     // }); // передать токен??
 

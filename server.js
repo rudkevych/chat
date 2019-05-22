@@ -96,10 +96,6 @@ app.get('/chat', function (req, res) {
         return res.redirect('/');
     }
     res.sendFile('chat.html', { root: __dirname });
-    // if(!token) {
-    //     return res.redirect('/');
-    // }
-
 });
 
 // POST method route, данные польозователя с страницы регистрации
@@ -176,8 +172,8 @@ app.post('/', async (req, res) => {
             // userCreate();
         }
     } catch (e) {
-        console.error("E, login,", e);
-        console.log('error in checking field');
+        // console.error("E, login,", e);
+        // console.log('error in checking field');
     }
 
     // поиск по массиву на сервере => заменяем на поиск в базе данных
@@ -199,64 +195,61 @@ app.post('/', async (req, res) => {
 app.use(express.static('chat'));
 server.listen(4001);
 
-io.on('connection', async function (socket) {
-    let token = socket.handshake.query.token;
-        console.log(socket.handshake.query.token);
+const usersOnline = new Set([]);
 
-    // if (!token) {
-    //     // socket.close();
-    //     throw Error ('Error with token')
-    // }
+io.on('connection', async function (socket) {
+    let { token } = socket.handshake.query;
+        // console.log(socket.handshake.query.token);
 
     let userByToken =  await User.findOne({token});
-    console.log('userByToken ', userByToken);
+    // console.log('userByToken ', userByToken);
 
     // пользователю добавить колонку в бд - isBanned
     if (!userByToken || userByToken.isBanned){
         // отключаем пользователя и заканчиваем выполнения данного замыкания
         socket.disconnect();
-        // socket.close();
-        // app.get('/banned', (req, res)=>{
-        //     res.redirect('/');
-        // });
-
-        // socket.on('forceDisconnect', function(){
-        //     socket.disconnect();
-        // });
     }
+    let { username } = userByToken;
+    usersOnline.add(username);
+    io.sockets.emit('usersList', {
 
-    // при подключении пользователя, нужно получить из данных подключения его токен (
-    // по этому токену нужно найти пользователя в бд
-    // проверить токен, если пользователя не нашли - запрещаем вход и отключаем клиента от сокет-сервера
-    // если пользователя нашли по токену - нужно проверить, забанен ли он. если да - отключаем от сокет-сервера
-
+        // data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
+        data: [...usersOnline] // show only one user
+    });
     socket.on('clientMessage', function (data) {
         // получили сообщение от клиента, рассылаем всем остальным клиентам - через oi.sockets.emit
         // socket.emit('serverMessage', data); - работает только с одним пользователем
         io.sockets.emit('serverMessage', data);
-        console.log('message from client: ', data);
+        // console.log('message from client: ', data);
     });
 
-    sendUsersOnlineList();
+    // sendUsersOnlineList();
 
     socket.on('disconnect', function(){
-        sendUsersOnlineList();
-        // console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
+        // sendUsersOnlineList();
+        usersOnline.delete(username);
+        io.sockets.emit('usersList', {
+            data: [...usersOnline] // show only one user
+        });
     });
 
-    function sendUsersOnlineList() {
-        ////// user online and users counter
-        // // список пользователей так же нужно рассылать, когда пользователь отключился (повеситься на событьие disconnect)
-        io.sockets.emit('usersList', {
-            data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
-        });
-    }
+    // console.log('client', client);
+    io.sockets.on('connect', function(client) {
+
+        // client.on('disconnect', function() {
+        // usersOnline.splice(usersOnline.indexOf(client));
+        // });
+        console.log('usersOnline', usersOnline);
+    });
+
+
 });
 
+
 io.on('connection', function(socket){
-    // console.log('a user connected, users online:', Object.keys(io.sockets.connected).length);
+
     socket.on('disconnect', function(){
-        // console.log('user disconnected, users online:', Object.keys(io.sockets.connected).length);
+
     });
 });
 
