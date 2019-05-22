@@ -38,7 +38,6 @@ let usersSchema = new mongoose.Schema({
 }, {
     versionKey: false
 });
-
 let User = mongoose.model("user", usersSchema);
 
 app.use(cors());
@@ -80,7 +79,6 @@ app.get('/', function (req, res) {
         return res.redirect('/chat');
     }
     res.sendFile('index.html', { root: __dirname });
-    // let token = usersSchema.token;
     // console.log('token ' + token);
 });
 
@@ -200,11 +198,8 @@ const usersOnline = new Set([]);
 io.on('connection', async function (socket) {
     let { token } = socket.handshake.query;
         // console.log(socket.handshake.query.token);
-
     let userByToken =  await User.findOne({token});
     // console.log('userByToken ', userByToken);
-
-    // пользователю добавить колонку в бд - isBanned
     if (!userByToken || userByToken.isBanned){
         // отключаем пользователя и заканчиваем выполнения данного замыкания
         socket.disconnect();
@@ -212,21 +207,23 @@ io.on('connection', async function (socket) {
     let { username } = userByToken;
     usersOnline.add(username);
     io.sockets.emit('usersList', {
-
         // data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
-        data: [...usersOnline] // show only one user
+        data: [...usersOnline] // userByToken.username show only one user
     });
-    socket.on('clientMessage', function (data) {
-        // получили сообщение от клиента, рассылаем всем остальным клиентам - через oi.sockets.emit
+
+    socket.on('clientMessage', function (fromClient) {
+        console.log(username);
         // socket.emit('serverMessage', data); - работает только с одним пользователем
-        io.sockets.emit('serverMessage', data);
+        io.sockets.emit('serverMessage', {
+            message: fromClient.data,
+            username
+        });
         // console.log('message from client: ', data);
     });
 
     // sendUsersOnlineList();
 
     socket.on('disconnect', function(){
-        // sendUsersOnlineList();
         usersOnline.delete(username);
         io.sockets.emit('usersList', {
             data: [...usersOnline] // show only one user
@@ -235,7 +232,6 @@ io.on('connection', async function (socket) {
 
     // console.log('client', client);
     io.sockets.on('connect', function(client) {
-
         // client.on('disconnect', function() {
         // usersOnline.splice(usersOnline.indexOf(client));
         // });
@@ -244,16 +240,6 @@ io.on('connection', async function (socket) {
 
 
 });
-
-
-io.on('connection', function(socket){
-
-    socket.on('disconnect', function(){
-
-    });
-});
-
-
 
 app.get('/item', function(req, res) {
     req.session.message = 'Hello World';

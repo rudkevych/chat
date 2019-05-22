@@ -32,15 +32,12 @@
     const usersOnline = document.getElementById('usersOnline');
     const user = localStorage.getItem('user');
     let token = '';
-    console.log(user);
+    let username = '';
     if(user) {
         token = JSON.parse(user).data.token;
     }
     console.log(token);
 
-    // if(!token) {
-    //     socket.disconnect();
-    // }
     const socket = io.connect(`http://localhost:4001?token=${token}`);
     // const socket = io.connect('http://localhost:4001', {
     //     query: {
@@ -56,7 +53,7 @@
     socket.on('serverMessage', function (fromServer) {
         console.log('message from server', fromServer);
         // полученное сообщение от сервера вывести на страницу
-        document.getElementById('messages').innerHTML += '<li>' + fromServer.data + '</li>';
+        document.getElementById('messages').innerHTML += '<li>' + fromServer.username + ' wrote:  ' + fromServer.message + '</li>';
     });
     /////  на buttonClick передаем value поля на сервер
     document.getElementById('sendButton').addEventListener('click', function (e) {
@@ -79,6 +76,7 @@
             return '<li>' +  user  + '</li>';
         }).join('');
     });
+
 
 </script>
 </body>
