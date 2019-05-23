@@ -33,6 +33,7 @@ let usersSchema = new mongoose.Schema({
     username: String,
     password: String,
     token: String,
+    isAdmin: { type: Boolean, default: false},
     isBanned: { type: Boolean, default: false},
     isMuted: { type: Boolean, default: false}
 }, {
@@ -86,7 +87,6 @@ app.get('/logout', (req, res)=>{
     req.session.user = null;
     res.redirect('/');
 });
-
 // get на страницу чата
 app.get('/chat', function (req, res) {
     //console.log('user',req.session.user);
@@ -132,7 +132,7 @@ app.post('/', async (req, res) => {
                 req.session.user = user;
                 res.json({
                     success: 'OK',
-                    data: {username: username, token: userByPass.token}
+                    data: {username: username, token: userByPass.token, isAdmin: userByPass.isAdmin}
                 });
                 // for(let keys in req.body) {
                 //     console.log(req.body[keys]);
@@ -165,15 +165,13 @@ app.post('/', async (req, res) => {
             req.session.user = userCreate;
             res.json({
                 success: 'OK',
-                data: {username: username, token: token}
+                data: {username: username, token: token, isAdmin: isAdmin}
             });
             // userCreate();
         }
     } catch (e) {
-        // console.error("E, login,", e);
-        // console.log('error in checking field');
+        console.error("E, login,", e);
     }
-
     // поиск по массиву на сервере => заменяем на поиск в базе данных
     // for (let i=0; i<users.length; i++) {
     //     let user = users[i];
@@ -196,7 +194,7 @@ server.listen(4001);
 const usersOnline = new Set([]);
 
 io.on('connection', async function (socket) {
-    let { token } = socket.handshake.query;
+    let {token} = socket.handshake.query;
         // console.log(socket.handshake.query.token);
     let userByToken =  await User.findOne({token});
     // console.log('userByToken ', userByToken);
@@ -204,11 +202,12 @@ io.on('connection', async function (socket) {
         // отключаем пользователя и заканчиваем выполнения данного замыкания
         socket.disconnect();
     }
+
     let { username } = userByToken;
     usersOnline.add(username);
     io.sockets.emit('usersList', {
         // data: ['quantity of users online:  ' + Object.keys(io.sockets.connected).length] // заменить на реальный список пользоватеелй
-        data: [...usersOnline] // userByToken.username show only one user
+        data: [...usersOnline] // userByToken.username show only one current user
     });
 
     socket.on('clientMessage', function (fromClient) {
@@ -226,7 +225,7 @@ io.on('connection', async function (socket) {
     socket.on('disconnect', function(){
         usersOnline.delete(username);
         io.sockets.emit('usersList', {
-            data: [...usersOnline] // show only one user
+            data: [...usersOnline]
         });
     });
 
@@ -235,15 +234,16 @@ io.on('connection', async function (socket) {
         // client.on('disconnect', function() {
         // usersOnline.splice(usersOnline.indexOf(client));
         // });
-        console.log('usersOnline', usersOnline);
+        // console.log('usersOnline', usersOnline);
     });
 
+    /////// users list for admin ////////////////
+    let allUsers = await User.distinct('username');
+    console.log(allUsers);
+    io.sockets.emit('listForAdmin', allUsers);
 
 });
 
-app.get('/item', function(req, res) {
-    req.session.message = 'Hello World';
-});
 
 // app.use(function (req, res, next) {
 //     if (!req.session.views) {
