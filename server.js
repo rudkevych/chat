@@ -132,7 +132,11 @@ app.post('/', async (req, res) => {
                 req.session.user = user;
                 res.json({
                     success: 'OK',
-                    data: {username: username, token: userByPass.token, isAdmin: userByPass.isAdmin}
+                    data: {
+                        username: username,
+                        token: userByPass.token,
+                        isAdmin: userByPass.isAdmin,
+                        id: userByPass._id}
                 });
                 // for(let keys in req.body) {
                 //     console.log(req.body[keys]);
@@ -237,13 +241,22 @@ io.on('connection', async function (socket) {
         // console.log('usersOnline', usersOnline);
     });
 
-    /////// users list for admin ////////////////
-    let allUsers = await User.distinct('username');
-    console.log(allUsers);
-    io.sockets.emit('listForAdmin', allUsers);
+
+    let listForAdmin = await User.find({}, {username: 1});
+    console.log(listForAdmin);
+    // console.log('id: ', id, 'username: ', username );
+;    /////// users list for admin ////////////////
+    // let allUsers = await User.distinct('username');
+    // console.log(allUsers);
+    console.log(listForAdmin._id);
+    io.sockets.emit('listForAdmin', listForAdmin);
 
 });
 
+
+// {
+//     id: listForAdmin._id,
+//         username: listForAdmin.username
 
 // app.use(function (req, res, next) {
 //     if (!req.session.views) {

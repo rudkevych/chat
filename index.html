@@ -76,20 +76,6 @@
         const username = userSelector.value;
         const password = passSelector.value;
 
-        // first version - skip empty fields
-        // try {
-        //     let response =  await axios.post('/', {
-        //         username,
-        //         password
-        //     });
-        //     localStorage.setItem('user', JSON.stringify(response.data));
-        //     window.location.href = "/chat";
-        //
-        // } catch (e) {
-        //     userSelector.className = 'error';
-        //     console.log('Login is error');
-        // }
-
         if(username === '' || password === '') {
             document.getElementById('errorField').innerHTML = '';
             let emptyError = 'Username or passport field cant be empty. Please enter your data ';
@@ -104,7 +90,6 @@
                 window.location.href = "/chat";
 
             } catch (e) {
-                // userSelector.className = 'error';
                 document.getElementById('errorField').innerHTML = '';
                 document.getElementById('errorField').innerHTML += 'You entered wrong password. Please try again';
                 console.log('Login is error');

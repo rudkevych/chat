@@ -10,6 +10,8 @@
 <style>
     button {
         margin-bottom: 20px;
+        padding: 5px 10px;
+        border-radius: 5px;
     }
 </style>
 <div id=”container”>
@@ -24,7 +26,7 @@
 <div id="usersOnlineWrapper">
     <p>Users online</p>
     <ul id="usersOnline"></ul>
-    <p>ADMIN USER LIST</p>
+<!--    <p>ADMIN USER LIST</p>-->
     <ul id="usersList"></ul>
 
 </div>
@@ -48,22 +50,34 @@
         console.log('You are admin, you can ban and mute users');
     }
 
+    const socket = io.connect(`http://localhost:4001?token=${token}`);
+
+
+    //  add here but without id
     // if(isAdmin) {
-    //     socket.on('usersList', function (fromServer) {
-    //         document.getElementById('usersList').innerHTML += 'User list for admin' + fromServer;
+    //     socket.on('listForAdmin', function (fromServer) {
+    //         document.getElementById('usersList').innerHTML = '';
+    //         // document.getElementById('usersList').innerHTML += '<p>' + 'ADMIN USERS LIST' + '</p>';
+    //         document.getElementById('usersList').innerHTML = fromServer.map((user)=> {
+    //             return '<li>' +  user  + '</li>' + '<button onclick="">BAN USER</button>' + ' ' + '<button>MUTE USER</button>';
+    //         }).join('');
     //     })
     // }
 
-    const socket = io.connect(`http://localhost:4001?token=${token}`);
+    // return '<li>' +  user.username  + '</li>' + '<button data-id="' + user.id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
 
+    console.log(user);
     if(isAdmin) {
-        socket.on('listForAdmin', function (fromServer) {
-            document.getElementById('usersList').innerHTML = '';
+        socket.on('listForAdmin', function (user) {
+            console.log(user); // массив
+            // document.getElementById('usersList').innerHTML = '';
             // document.getElementById('usersList').innerHTML += '<p>' + 'ADMIN USERS LIST' + '</p>';
-            document.getElementById('usersList').innerHTML = fromServer.map((user)=> {
-                return '<li>' +  user  + '</li>' + '<button onclick="">BAN USER</button>' + ' ' + '<button>MUTE USER</button>';
-            }).join('');
+            document.getElementById('usersList').innerHTML +=  '<li>' +  user.username  + '</li>' + '<button data-id="' + user._id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
         })
+    }
+
+    function sendBanData() {
+
     }
 
     socket.on('chat', function (data) {
