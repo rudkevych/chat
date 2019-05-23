@@ -244,11 +244,7 @@ io.on('connection', async function (socket) {
 
     let listForAdmin = await User.find({}, {username: 1});
     console.log(listForAdmin);
-    // console.log('id: ', id, 'username: ', username );
 ;    /////// users list for admin ////////////////
-    // let allUsers = await User.distinct('username');
-    // console.log(allUsers);
-    console.log(listForAdmin._id);
     io.sockets.emit('listForAdmin', listForAdmin);
 
 });

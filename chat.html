@@ -69,17 +69,27 @@
     console.log(user);
     if(isAdmin) {
         socket.on('listForAdmin', function (user) {
-            console.log(user); // массив
+            // console.log(user); // массив
+            // console.log(user[0]._id);
             // document.getElementById('usersList').innerHTML = '';
             // document.getElementById('usersList').innerHTML += '<p>' + 'ADMIN USERS LIST' + '</p>';
-            document.getElementById('usersList').innerHTML +=  '<li>' +  user.username  + '</li>' + '<button data-id="' + user._id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
+            // document.getElementById('usersList').innerHTML +=  '<li>' +  user.username  + '</li>' + '<button data-id="' + user._id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
+            for(let i=1; i< user.length; i++) { // c единицы потому что админа пропускаем
+                document.getElementById('usersList').innerHTML +=  '<li>' +  user[i].username  + '</li>' + '<button data-id="' + user[i]._id + '" onclick="sendBanData()" >BAN USER</button>'
+                    + ' ' + '<button data-id="' + user[i]._id + '" onclick="sendMuteData()">MUTE USER</button>';
+            }
         })
     }
 
     function sendBanData() {
+        socket.emit('banData', {
 
+        })
     }
 
+    function sendMuteData() {
+        socket.emit('muteData')
+    }
     socket.on('chat', function (data) {
         console.log(data);
         socket.emit('myNewEvent', {data: 'Hello Oksana'});
