@@ -1,0 +1,136 @@
+body {
+    background: lightgray;
+}
+
+.goButton {
+    width: 200px;
+    height: 50px;
+}
+.orange {
+    color: orange;
+}
+.form {
+    position: relative;
+    background: #FFFFFF;
+    max-width: 360px;
+    margin: 80px auto 100px;
+    padding: 45px;
+    text-align: center;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    border-radius: 20px;
+}
+.form input {
+    outline: 0;
+    background: #f2f2f2;
+    width: 100%;
+    border: 0;
+    margin: 0 0 15px;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+.form button {
+    text-transform: uppercase;
+    background: orange;
+    width: 100%;
+    border: 0;
+    padding: 15px;
+    color: #FFFFFF;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 20px;
+}
+
+body {
+    margin: 30px 80px;
+    font-family: Arial, sans-serif;
+}
+
+ul {
+    list-style: none;
+}
+
+#chatWrapper {
+    width: 60vw;
+}
+
+.messagesWrapper {
+    height: 40vh;
+}
+
+.messagesWrapper {
+    overflow: auto;
+    margin-bottom: 20px;
+    background: #fff3e5;
+    border-radius: 20px;
+}
+
+input {
+    outline: 0;
+    background: #f2f2f2;
+    width: 75%;
+    border: 0;
+    padding: 15px;
+    box-sizing: border-box;
+    font-size: 14px;
+    border-radius: 10px;
+    margin-right: 5px;
+}
+
+#sendButton {
+    text-transform: uppercase;
+    background: orange;
+    width: 20%;
+    border: 0;
+    padding: 10px;
+    color: #FFFFFF;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 17px;
+    margin: 0 auto;
+}
+
+#form {
+    display: flex;
+}
+
+#usersOnline {
+    padding: 3% 3%;
+    width: 20vw;
+    height: auto;
+    margin-bottom: 20px;
+    background: #fff3e5;
+    border-radius: 20px;
+}
+
+#usersOnlineWrapper {
+    display: flex;
+}
+
+#usersOnlineWrapper button {
+    text-transform: uppercase;
+    border: 0;
+    padding: 5px 10px;
+    color: #FFFFFF;
+    cursor: pointer;
+    border-radius: 17px;
+    margin: 0 auto 15px;
+}
+
+.banButton {
+    background: #ef572d;
+}
+
+.muteButton {
+    background: #f4d641;
+}
+
+.onlineUsers {
+    margin-right: 50px;
+}
+
+.unbanButton, .unmuteButton {
+    background: mediumseagreen;
+}
+
+

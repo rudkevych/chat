@@ -21,6 +21,11 @@ db.once('open', function() {
     // console.log('We are connected db open');
 });
 
+// app.use(express.static('style.css'));
+// app.use('/static', express.static('style.css'));
+app.use("/", express.static(__dirname));
+app.use("/style", express.static(__dirname + '/style.css'));
+
 /// express sessions
 app.use(session({
     secret: 'keyboard cat',
@@ -126,7 +131,7 @@ app.post('/', async (req, res) => {
         let user = await User.findOne({username});
         // console.log('user', user);
         if (user) {
-            console.log("User found in database");
+            console.log("User is found in database");
             let userByPass = await User.findOne({password: password});
             if (userByPass) {
                 req.session.user = user;
@@ -204,7 +209,12 @@ io.on('connection', async function (socket) {
     // console.log('userByToken ', userByToken);
     if (!userByToken || userByToken.isBanned){
         // отключаем пользователя и заканчиваем выполнения данного замыкания
+        socket.emit('banText', 'We are so sorry, but you are banned. You cant see and send messages in chat');
         socket.disconnect();
+    }
+
+    if(userByToken.isMuted) {
+        socket.emit('muteText', 'We are so sorry, but you are muted by admin. Now you can only read messages')
     }
 
     let { username } = userByToken;
@@ -241,29 +251,37 @@ io.on('connection', async function (socket) {
         // console.log('usersOnline', usersOnline);
     });
 
-
+    /////// users list for admin ////////////////
     let listForAdmin = await User.find({}, {username: 1});
-    console.log(listForAdmin);
-;    /////// users list for admin ////////////////
     io.sockets.emit('listForAdmin', listForAdmin);
+
+    // принимает id пользователя, котоорый забанен и меняем поле isBanned: true
+    socket.on('banData', async function(_id) {
+        console.log(_id);
+        // let userIsBanned = await User.findOne({_id});
+        // console.log(userIsBanned);
+        await User.updateOne({"_id": _id}, {$set: {isBanned : true}});
+    });
+
+    socket.on('muteData', async function(id) {
+        console.log('mute id', id);
+        await User.updateOne({"_id": id}, {$set: {isMuted : true}});
+    });
+
+    socket.on('unbanData', async function(_id) {
+        console.log(_id);
+        // let userIsBanned = await User.findOne({_id});
+        // console.log(userIsBanned);
+        await User.updateOne({"_id": _id}, {$set: {isBanned : false}});
+    });
+
+    socket.on('unmuteData', async function(id) {
+        console.log('mute id', id);
+        await User.updateOne({"_id": id}, {$set: {isMuted : false}});
+    });
+
 
 });
 
 
-// {
-//     id: listForAdmin._id,
-//         username: listForAdmin.username
-
-// app.use(function (req, res, next) {
-//     if (!req.session.views) {
-//         req.session.views = {}
-//     }
-//     // get the url pathname
-//     let pathname = parseurl(req).pathname;
-//
-//     // count the views
-//     req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
-//
-//     next()
-// });
 

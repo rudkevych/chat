@@ -5,108 +5,18 @@
     <title>Chat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="style/style.css">
 </head>
 <body>
 
-<style>
-    body {
-        margin: 30px 80px;
-        font-family: Arial, sans-serif;
-    }
-
-    ul {
-        list-style: none;
-    }
-
-    .chatWrapper {
-        width: 60vw;
-    }
-
-    .messagesWrapper {
-        height: 40vh;
-    }
-
-    .messagesWrapper {
-        overflow: auto;
-        margin-bottom: 20px;
-        background: #fff3e5;
-        border-radius: 20px;
-    }
-
-    input {
-        outline: 0;
-        background: #f2f2f2;
-        width: 75%;
-        border: 0;
-        padding: 15px;
-        box-sizing: border-box;
-        font-size: 14px;
-        border-radius: 10px;
-        margin-right: 5px;
-    }
-
-    #sendButton {
-        text-transform: uppercase;
-        background: orange;
-        width: 20%;
-        border: 0;
-        padding: 10px;
-        color: #FFFFFF;
-        font-size: 20px;
-        cursor: pointer;
-        border-radius: 17px;
-        margin: 0 auto;
-    }
-
-    form {
-        display: flex;
-    }
-
-    #usersOnline {
-        padding: 3% 3%;
-        width: 20vw;
-        height: auto;
-        margin-bottom: 20px;
-        background: #fff3e5;
-        border-radius: 20px;
-    }
-
-    #usersOnlineWrapper {
-        display: flex;
-    }
-
-    #usersOnlineWrapper button {
-        text-transform: uppercase;
-        border: 0;
-        padding: 5px 10px;
-        color: #FFFFFF;
-        cursor: pointer;
-        border-radius: 17px;
-        margin: 0 auto 15px;
-    }
-
-    .banButton {
-        background: #ef572d;
-    }
-
-    .muteButton {
-        background: #2d84ef;
-    }
-
-    .onlineUsers {
-        margin-right: 50px;
-    }
-
-</style>
 <div class="chatWrapper">
     <div class=”container”>
         <div class="messagesWrapper">
             <ul id="messages"></ul>
         </div>
-        <form>
-            <input id="messageField" autocomplete="off" placeholder="write your message here...">
+        <form id="form">
+            <input id="messageField" autocomplete="off" placeholder="write your message here..." minlength="200">
             <button id="sendButton">Send</button>
-            <!--            <button id="logoutButton">LOGOUT</button>-->
         </form>
     </div>
     <div id="usersOnlineWrapper">
@@ -115,12 +25,12 @@
             <ul id="usersOnline"></ul>
         </div>
         <div class="listUsers">
-            <p>All users list </p>
             <ul id="usersList"></ul>
         </div>
-
     </div>
 </div>
+<div id="banText"></div>
+<div id="muteText"></div>
 
 <script>
     const messageSelector = document.getElementById('messageField');
@@ -144,34 +54,24 @@
     const socket = io.connect(`http://localhost:4001?token=${token}`);
 
 
-    //  add here but without id
-    // if(isAdmin) {
-    //     socket.on('listForAdmin', function (fromServer) {
-    //         document.getElementById('usersList').innerHTML = '';
-    //         // document.getElementById('usersList').innerHTML += '<p>' + 'ADMIN USERS LIST' + '</p>';
-    //         document.getElementById('usersList').innerHTML = fromServer.map((user)=> {
-    //             return '<li>' +  user  + '</li>' + '<button onclick="">BAN USER</button>' + ' ' + '<button>MUTE USER</button>';
-    //         }).join('');
-    //     })
-    // }
-
-    // return '<li>' +  user.username  + '</li>' + '<button data-id="' + user.id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
-
     console.log(user);
     if (isAdmin) {
         socket.on('listForAdmin', function (users) {
+
             // console.log(user); // массив
             // console.log(user[0]._id);
             // document.getElementById('usersList').innerHTML = '';
             // document.getElementById('usersList').innerHTML += '<p>' + 'ADMIN USERS LIST' + '</p>';
             // document.getElementById('usersList').innerHTML +=  '<li>' +  user.username  + '</li>' + '<button data-id="' + user._id + '" onclick="sendBanData()" >BAN USER</button>' + ' ' + '<button id="muteButton">MUTE USER</button>';
 
+            // my version
             // for (let i = 1; i < user.length; i++) { // c единицы потому что админа пропускаем
             //     document.getElementById('usersList').innerHTML += '<li>' + user[i].username + '</li>' + '<button data-id="' + user[i]._id + '" onclick="sendBanData(user[i])()" class="banButton" >BAN USER</button>'
             //         + ' ' + '<button data-id="' + user[i]._id + '" onclick="sendMuteData()" class="muteButton">MUTE USER</button>';
             // }
 
             const list = document.getElementById('usersList');
+            list.innerHTML = '';
             users
                 .filter(user => user.username !== 'admin')
                 .forEach(({ username, _id }) => {
@@ -184,6 +84,12 @@
                                 </button>
                                  <button  class="muteButton" data-id="${_id}" onclick="sendMuteData(event)">
                                     MUTE USER
+                                </button>
+                                <button class="unbanButton" data-id="${_id}" onclick="sendUnbanData(event)">
+                                    UNBAN USER
+                                </button>
+                                 <button  class="unmuteButton" data-id="${_id}" onclick="sendUnmuteData(event)">
+                                    UNMUTE USER
                                 </button>
                             </div>
                         </li>`;
@@ -198,10 +104,23 @@
         socket.emit('banData', id)
     };
 
+    const sendMuteData = (event) => {
+        const id = event.target.getAttribute('data-id');
+        console.log(event, id);
+        socket.emit('muteData', id);
+    };
 
-    function sendMuteData() {
-        socket.emit('muteData')
-    }
+    const sendUnbanData = (event) => {
+        const id = event.target.getAttribute('data-id');
+        console.log('event', id);
+        socket.emit('unbanData', id)
+    };
+
+    const sendUnmuteData = (event) => {
+        const id = event.target.getAttribute('data-id');
+        console.log(event, id);
+        socket.emit('unmuteData', id);
+    };
 
     socket.on('chat', function (data) {
         console.log(data);
@@ -235,6 +154,21 @@
         }).join('');
     });
 
+    socket.on('banText', function (dataFromServer) {
+        document.getElementById('banText').innerHTML = '' ;
+        console.log('ban text', dataFromServer);
+        // let content = document.getElementById('chatWrapper');
+        // content.style.display = 'none';
+        document.getElementById('banText').innerHTML += dataFromServer;
+    });
+
+    socket.on('muteText', function (dataFromServer) {
+        document.getElementById('muteText').innerHTML = '';
+        let form = document.querySelector('form');
+        form.style.display= 'none';
+        console.log('mute text', dataFromServer);
+        document.getElementById('muteText').innerHTML += dataFromServer;
+    })
 
 </script>
 </body>
