@@ -34,9 +34,9 @@
 
 <script>
     const messageSelector = document.getElementById('messageField');
-    const messagesField = document.getElementById('messages');
-    const sendButton = document.getElementById('sendButton');
-    const usersOnline = document.getElementById('usersOnline');
+    // const messagesField = document.getElementById('messages');
+    // const sendButton = document.getElementById('sendButton');
+    // const usersOnline = document.getElementById('usersOnline');
     const user = localStorage.getItem('user');
     let token = '';
     let isAdmin;
@@ -122,25 +122,27 @@
         socket.emit('unmuteData', id);
     };
 
-    socket.on('chat', function (data) {
-        console.log(data);
-        socket.emit('myNewEvent', {data: 'Hello Oksana'});
-    });
+    // socket.on('chat', function (data) {
+    //     console.log(data);
+    //     socket.emit('myNewEvent', {data: 'Hello Oksana'});
+    // });
+
     //////получаем сообщение от сервера
     socket.on('serverMessage', function (fromServer) {
         console.log('message from server', fromServer);
 
-        // рандомный цвет
+        // рандомный цвет - доделать
         let colors = ['green', 'blue', 'red', 'grey', 'orange'];
-        let length = colors.length + 1;
+        let length = colors.length;
         let random = Math.floor(Math.random() * (length));
         let randomColor = colors[random];
-        messages.style.color = randomColor;
+        // messages.style.color = randomColor;
 
-        let messageBody = document.querySelector('#messages');
-        messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+        // let messageBody = document.querySelector('#messages');
+        // messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+
         // полученное сообщение от сервера вывести на страницу
-        document.getElementById('messages').innerHTML += '<li>' + fromServer.username + ' wrote:  ' + fromServer.message + '</li>';
+        document.getElementById('messages').innerHTML += '<li style="color: '+randomColor+'">' + fromServer.username + ' wrote:  ' + fromServer.message + '</li>';
 
     });
     /////  на buttonClick передаем value поля на сервер
@@ -180,11 +182,6 @@
         console.log('mute text', dataFromServer);
         document.getElementById('muteText').innerHTML += dataFromServer;
     });
-
-
-
-    // textarea.scrollUp = textarea.scrollHeight;
-
 
 </script>
 </body>

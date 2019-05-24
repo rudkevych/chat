@@ -8,10 +8,10 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 
 // хэширование пароля
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
-const myPlaintextPassword = 's0/\/\P4$$w0rD';
-const someOtherPlaintextPassword = 'not_bacon';
+// const bcrypt = require('bcrypt');
+// const saltRounds = 10;
+// const myPlaintextPassword = 's0/\/\P4$$w0rD';
+// const someOtherPlaintextPassword = 'not_bacon';
 
 mongoose.connect("mongodb://localhost:27017/chatUsers",  { useNewUrlParser: true } );
 const db = mongoose.connection;
@@ -132,6 +132,7 @@ app.post('/', async (req, res) => {
         // console.log('user', user);
         if (user) {
             console.log("User is found in database");
+            // пропуск пароля
             let userByPass = await User.findOne({password: password});
             if (userByPass) {
                 req.session.user = user;
@@ -211,6 +212,8 @@ io.on('connection', async function (socket) {
         // отключаем пользователя и заканчиваем выполнения данного замыкания
         socket.emit('banText', 'We are so sorry, but you are banned. You cant see and send messages in chat');
         socket.disconnect();
+
+        // обработка на фронте
     }
 
     if(userByToken.isMuted) {
@@ -226,6 +229,7 @@ io.on('connection', async function (socket) {
 
     socket.on('clientMessage', function (fromClient) {
         console.log(username);
+        // проверить mute
         // console.log(fromClient.substring(0, 200));
         // fromClient = fromClient.substring(0, 200);
         // socket.emit('serverMessage', data); - работает только с одним пользователем
@@ -246,12 +250,12 @@ io.on('connection', async function (socket) {
     });
 
     // console.log('client', client);
-    io.sockets.on('connect', function(client) {
-        // client.on('disconnect', function() {
-        // usersOnline.splice(usersOnline.indexOf(client));
-        // });
-        // console.log('usersOnline', usersOnline);
-    });
+    // io.sockets.on('connect', function(client) {
+    //     // client.on('disconnect', function() {
+    //     // usersOnline.splice(usersOnline.indexOf(client));
+    //     // });
+    //     // console.log('usersOnline', usersOnline);
+    // });
 
     /////// users list for admin ////////////////
     let listForAdmin = await User.find({}, {username: 1});
@@ -260,6 +264,7 @@ io.on('connection', async function (socket) {
     // принимает id пользователя, котоорый забанен и меняем поле isBanned: true
     socket.on('banData', async function(_id) {
         console.log(_id);
+        // проверка на админ
         // let userIsBanned = await User.findOne({_id});
         // console.log(userIsBanned);
         await User.updateOne({"_id": _id}, {$set: {isBanned : true}});
@@ -281,7 +286,6 @@ io.on('connection', async function (socket) {
         console.log('mute id', id);
         await User.updateOne({"_id": id}, {$set: {isMuted : false}});
     });
-
 
 });
 
