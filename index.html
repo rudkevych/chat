@@ -10,25 +10,52 @@
 <body>
 <style>
     body {
-        background: #ececec;
-
+        background: lightgray;
     }
     button {
         width: 200px;
         height: 50px;
-
     }
-
-    .error{
-        background: red;
+    .orange {
+        color: orange;
+    }
+    .form {
+        position: relative;
+        background: #FFFFFF;
+        max-width: 360px;
+        margin: 80px auto 100px;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        border-radius: 20px;
+    }
+    .form input {
+        outline: 0;
+        background: #f2f2f2;
+        width: 100%;
+        border: 0;
+        margin: 0 0 15px;
+        padding: 15px;
+        box-sizing: border-box;
+        font-size: 14px;
+    }
+    .form button {
+        text-transform: uppercase;
+        background: orange;
+        width: 100%;
+        border: 0;
+        padding: 15px;
+        color: #FFFFFF;
+        font-size: 20px;
+        cursor: pointer;
+        border-radius: 20px;
     }
 </style>
-<h1 style="color: darkorange">MaybeWorks Chat</h1>
 
 <div class="loginPage">
     <div class="form">
         <form class="registration" onsubmit="">
-            <h1>REGISTRATION</h1>
+            <h1>Maybe.<span class="orange">Works</span> Chat</h1>
             <input type="text" class="input" name="username" placeholder="username" autocomplete="off" pattern="[0-9a-zA-Z]{3,}"
                    required title="3 characters minimum without special characters" minlength="3">
             <input type="password" name="password" placeholder="password" required> <br><br>
