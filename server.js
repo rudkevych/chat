@@ -226,6 +226,8 @@ io.on('connection', async function (socket) {
 
     socket.on('clientMessage', function (fromClient) {
         console.log(username);
+        // console.log(fromClient.substring(0, 200));
+        // fromClient = fromClient.substring(0, 200);
         // socket.emit('serverMessage', data); - работает только с одним пользователем
         io.sockets.emit('serverMessage', {
             message: fromClient.data,

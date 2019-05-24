@@ -15,7 +15,7 @@
             <ul id="messages"></ul>
         </div>
         <form id="form">
-            <input id="messageField" autocomplete="off" placeholder="write your message here..." minlength="200">
+            <input id="messageField" autocomplete="off" placeholder="write your message here..." maxlength="200">
             <button id="sendButton">Send</button>
         </form>
     </div>
@@ -129,8 +129,19 @@
     //////получаем сообщение от сервера
     socket.on('serverMessage', function (fromServer) {
         console.log('message from server', fromServer);
+
+        // рандомный цвет
+        let colors = ['green', 'blue', 'red', 'grey', 'orange'];
+        let length = colors.length + 1;
+        let random = Math.floor(Math.random() * (length));
+        let randomColor = colors[random];
+        messages.style.color = randomColor;
+
+        let messageBody = document.querySelector('#messages');
+        messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
         // полученное сообщение от сервера вывести на страницу
         document.getElementById('messages').innerHTML += '<li>' + fromServer.username + ' wrote:  ' + fromServer.message + '</li>';
+
     });
     /////  на buttonClick передаем value поля на сервер
     document.getElementById('sendButton').addEventListener('click', function (e) {
@@ -168,7 +179,12 @@
         form.style.display= 'none';
         console.log('mute text', dataFromServer);
         document.getElementById('muteText').innerHTML += dataFromServer;
-    })
+    });
+
+
+
+    // textarea.scrollUp = textarea.scrollHeight;
+
 
 </script>
 </body>
